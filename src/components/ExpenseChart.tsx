@@ -3,9 +3,16 @@ import { PieChart, Pie, Tooltip, Cell, Legend } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A28EFF"];
 
-export default function ExpenseChart({ data }: { data: Record<string, number> }) {
+interface ExpenseChartProps {
+  data: Record<string, number>;
+}
+
+export default function ExpenseChart({ data }: ExpenseChartProps) {
   // แปลง Object เป็น Array ของแต่ละ category
-  const chartData = Object.entries(data).map(([name, value]) => ({ name, value }));
+  const chartData = Object.entries(data).map(([name, value]) => ({
+    name: name || "Unknown",
+    value,
+  }));
 
   return (
     <PieChart width={400} height={300}>
@@ -16,7 +23,7 @@ export default function ExpenseChart({ data }: { data: Record<string, number> })
         cx="50%"
         cy="50%"
         outerRadius={100}
-        label={(entry) => `${entry.name}: ${entry.value}฿`} 
+        label={(entry) => `${entry.name}: ${entry.value}฿`}
       >
         {chartData.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

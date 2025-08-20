@@ -1,40 +1,36 @@
-//บันทึก/ดึงค่าใช้จ่าย
-import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabaseClient';
 
-// GET /api/expenses?from=2025-01-01&to=2025-01-31
+// GET /api/expenses?from=2025-08-01&to=2025-08-20&categoryId=1
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const from = searchParams.get("from");
-  const to = searchParams.get("to");
-  const categoryId = searchParams.get("categoryId");
-  const expenses = await prisma.expense.findMany({
-    where: {
-      date: {
-        gte: from ? new Date(from) : undefined,
-        lte: to ? new Date(to) : undefined,
-      },
-        categoryId: categoryId ? parseInt(categoryId) : undefined,
+  const from = searchParams.get('from');
+  const to = searchParams.get('to');
+  const categoryId = searchParams.get('categoryId');
 
-    },
-    include: { category: true },
-    orderBy: { date: "desc" },
-  });
+  let query = supabase.from('expense').select('*, category(*)');
 
-  return NextResponse.json(expenses);
+  if (from) query = query.gte('date', from);
+  if (to) query = query.lte('date', to);
+  if (categoryId) query = query.eq('category_id', categoryId);
+
+  const { data, error } = await query;
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json(data);
 }
 
 // POST /api/expenses
 export async function POST(req: Request) {
   const body = await req.json();
-  const expense = await prisma.expense.create({
-    data: {
-      amount: body.amount,
-      description: body.description,
-      categoryId: body.categoryId,
-      date: new Date(body.date),
-    },
-  });
-  return NextResponse.json(expense);
-}
+  const { amount, description, category_id, date } = body;
 
+  const { data, error } = await supabase.from('expense').insert([
+    { amount, description, category_id, date }
+  ]);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json(data);
+}
