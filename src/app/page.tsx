@@ -3,20 +3,38 @@ import { useState, useEffect } from "react";
 import ExpenseChart from "../components/ExpenseChart";
 import ExpenseModal from "../components/ExpenseModal";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { supabase } from "@/lib/supabaseClient"; // ต้อง import supabase
+import { supabase } from "@/lib/supabaseClient";
+
+// กำหนด type สำหรับ expense
+interface Expense {
+  id: number;
+  amount: number;
+  description: string;
+  date: string;
+  category?: { name: string };
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
+interface Summary {
+  total: number;
+  byCategory: Record<string, number>;
+}
 
 export default function Dashboard() {
-  const [summary, setSummary] = useState<{ total: number; byCategory: Record<string, number> }>({ total: 0, byCategory: {} });
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [summary, setSummary] = useState<Summary>({ total: 0, byCategory: {} });
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [category_id, setCategoryId] = useState("");
 
-  // ดึงหมวดหมู่จาก Supabase
   const fetchCategories = async () => {
-    const { data, error } = await supabase.from("category").select("*");
+    const { data, error } = await supabase.from<Category>("category").select("*");
     if (data) setCategories(data);
     if (error) console.error(error);
   };
@@ -28,16 +46,16 @@ export default function Dashboard() {
     if (category_id) query.append("category_id", category_id);
 
     const resSummary = await fetch(`/api/dashboard?${query.toString()}`);
-    const dataSummary = await resSummary.json();
+    const dataSummary: Summary = await resSummary.json();
     setSummary(dataSummary);
 
     const resList = await fetch(`/api/expenses?${query.toString()}`);
-    const dataList = await resList.json();
+    const dataList: Expense[] = await resList.json();
     setExpenses(dataList);
   };
 
   useEffect(() => {
-    fetchCategories(); // ดึงหมวดหมู่ตอน mount
+    fetchCategories();
     fetchData();
   }, []);
 
@@ -65,14 +83,11 @@ export default function Dashboard() {
         <select
           value={category_id}
           onChange={(e) => setCategoryId(e.target.value)}
-          required
           className="border border-gray-300 bg-white text-black p-2 rounded dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
         >
           <option value="">All Categories</option>
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
+            <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
         <button
@@ -87,7 +102,7 @@ export default function Dashboard() {
       <p className="mb-4 text-lg font-semibold">Total Expense: {summary.total} ฿</p>
       <ExpenseChart data={summary.byCategory} />
 
-      {/* ปุ่มเพิ่ม */}
+      {/* Add Expense */}
       <button
         onClick={() => setIsModalOpen(true)}
         className="mt-6 bg-green-500 text-white dark:text-black px-4 py-2 rounded hover:bg-green-600"
@@ -100,7 +115,7 @@ export default function Dashboard() {
         onClose={() => { setIsModalOpen(false); fetchData(); }}
       />
 
-      {/* List รายการ Expense */}
+      {/* Expense Table */}
       <div className="mt-6">
         <h2 className="text-xl font-bold mb-2">All Expenses</h2>
         <table className="w-full border-collapse border border-gray-300 dark:border-gray-700">
