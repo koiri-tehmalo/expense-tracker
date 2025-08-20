@@ -34,3 +34,38 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+expense-tracker/
+│── prisma/
+│   └── schema.prisma          #กำหนด Database Schema
+│
+│── src/
+│   ├── app/
+│   │   ├── page.tsx           
+# Dashboard
+│   │   ├── add/page.tsx       
+# หน้าเพิ่มค่าใช้จ่าย
+│   │   ├── api/
+│   │   │   ├── expenses/
+│   │   │   │   ├── route.ts   
+# API: GET, POST ค่าใช้จ่าย
+│   │   │   └── dashboard/
+│   │   │       └── route.ts   
+# API: GET Dashboard summary
+│   │   └── layout.tsx         
+# Layout หลัก
+│   │
+│   ├── components/
+│   │   ├── ExpenseForm.tsx    
+# ฟอร์มเพิ่มค่าใช้จ่าย
+│   │   └── ExpenseChart.tsx   
+# กราฟ Dashboard
+│   │
+│   └── lib/
+│       └── prisma.ts          
+# Prisma Client
+│
+│── package.json
+│── tsconfig.json
+│── tailwind.config.js
+│── .env
