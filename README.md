@@ -1,71 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💰 Expense Tracker App
 
-## Getting Started
+ระบบบันทึกและติดตามค่าใช้จ่าย (Expense Tracker) ที่พัฒนาด้วย **Next.js + Supabase**  
+พร้อม Dashboard สำหรับสรุปรายจ่ายและการแสดงผลแบบกราฟ  
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 คุณสมบัติ (Features)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- ✅ เพิ่ม / ลบ รายการค่าใช้จ่าย  
+- ✅ จัดหมวดหมู่ค่าใช้จ่าย (Categories)  
+- ✅ Filter ตามช่วงวันที่ และหมวดหมู่  
+- ✅ Dashboard แสดงผลรวมรายจ่ายทั้งหมด  
+- ✅ กราฟวงกลม (Pie Chart) แสดงสัดส่วนค่าใช้จ่ายแต่ละหมวด  
+- ✅ รองรับ Dark / Light Theme  
+- ✅ Responsive ใช้งานได้ทั้งมือถือและ Desktop  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
 
-## Learn More
+- **Frontend**: [Next.js 14](https://nextjs.org/) + React + TailwindCSS  
+- **Backend**: [Supabase](https://supabase.com/) (Database + API)  
+- **Chart**: [Recharts](https://recharts.org/)  
+- **Deployment**: [Vercel](https://vercel.com/) 
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 การติดตั้ง (Installation)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone โปรเจกต์
+   ```bash
+   git clone https://github.com/koiri-tehmalo/expense-tracker.git
+   cd expense-tracker
+2. ติดตั้ง dependencies
+   ```bash
+   npm install
+   # หรือ
+   yarn install
+4. รันโปรเจกต์
+   ```bash
+   npm run dev
+   # หรือ
+   yarn dev
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-expense-tracker/
-│── prisma/
-│   └── schema.prisma          #กำหนด Database Schema
-│
-│── src/
-│   ├── app/
-│   │   ├── page.tsx           
-# Dashboard
-│   │   ├── add/page.tsx       
-# หน้าเพิ่มค่าใช้จ่าย
-│   │   ├── api/
-│   │   │   ├── expenses/
-│   │   │   │   ├── route.ts   
-# API: GET, POST ค่าใช้จ่าย
-│   │   │   └── dashboard/
-│   │   │       └── route.ts   
-# API: GET Dashboard summary
-│   │   └── layout.tsx         
-# Layout หลัก
-│   │
-│   ├── components/
-│   │   ├── ExpenseForm.tsx    
-# ฟอร์มเพิ่มค่าใช้จ่าย
-│   │   └── ExpenseChart.tsx   
-# กราฟ Dashboard
-│   │
-│   └── lib/
-│       └── prisma.ts          
-# Prisma Client
-│
-│── package.json
-│── tsconfig.json
-│── tailwind.config.js
-│── .env
+👨‍💻 ผู้พัฒนา
+  ชื่อผู้พัฒนา: มูฮัมหมัดคอยรี เต๊ะมาลอ
+  คณะวิศวกรรมศาสตร์ สาขาวิศวกรรมคอมพิวเตอร์
+  📧 Email: khayreetehmalo@gmail.com
