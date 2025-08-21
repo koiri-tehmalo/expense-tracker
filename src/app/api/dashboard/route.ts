@@ -1,8 +1,7 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
-// กำหนด type สำหรับ expense
-interface Expense {
+export interface Expense {
   id: number;
   amount: number;
   description: string;
@@ -11,28 +10,53 @@ interface Expense {
   category?: { name: string };
 }
 
+export interface Summary {
+  total: number;
+  byCategory: Record<string, number>;
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const from = searchParams.get('from');
-  const to = searchParams.get('to');
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+  const categoryIdStr = searchParams.get("category_id");
+  const category_id = categoryIdStr ? Number(categoryIdStr) : undefined;
 
-  let query = supabase.from('expense').select('id, amount, category_id, category(name)');
+  // Query ไม่ใช้ generic <Expense>
+  let query = supabase
+    .from("expense")
+    .select("id, amount, description, date, category_id, category(name)");
 
-  if (from) query = query.gte('date', from);
-  if (to) query = query.lte('date', to);
+  if (from) query = query.gte("date", from);
+  if (to) query = query.lte("date", to);
+  if (category_id !== undefined) query = query.eq("category_id", category_id);
 
-  const { data: expenses, error } = await query as { data: Expense[] | null, error: any };
+  const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const total = expenses?.reduce((sum, e) => sum + e.amount, 0) || 0;
+  // แปลง data เป็น Expense[]
+  const expenses: Expense[] = Array.isArray(data)
+    ? data.map((item) => ({
+        id: item.id,
+        amount: item.amount,
+        description: item.description,
+        date: item.date,
+        category_id: item.category_id,
+        category:
+          item.category && typeof item.category === "object" && "name" in item.category
+            ? { name: (item.category as { name: string }).name }
+            : undefined,
+      }))
+    : [];
+  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-  const byCategory = expenses?.reduce<Record<string, number>>((acc, e) => {
-    const name = e.category?.name || 'Unknown';
-    acc[name] = (acc[name] || 0) + e.amount;
-    return acc;
-  }, {}) || {};
+  const byCategory: Record<string, number> = {};
+  expenses.forEach((e) => {
+    const name = e.category?.name ?? "Unknown";
+    byCategory[name] = (byCategory[name] || 0) + e.amount;
+  });
 
-  return NextResponse.json({ total, byCategory });
+  const summary: Summary = { total, byCategory };
+  return NextResponse.json(summary);
 }
