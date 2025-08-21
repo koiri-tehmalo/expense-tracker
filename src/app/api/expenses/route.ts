@@ -1,36 +1,41 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 
-// GET /api/expenses?from=2025-08-01&to=2025-08-20&categoryId=1
+// กำหนด type สำหรับ expense
+interface Expense {
+  id: number;
+  amount: number;
+  description: string;
+  date: string;
+  category_id: number;
+  category?: { name: string };
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const from = searchParams.get('from');
   const to = searchParams.get('to');
-  const categoryId = searchParams.get('categoryId');
 
-  let query = supabase.from('expense').select('*, category(*)');
+  // 👇 ไม่ต้องใส่ generic ใน from() ให้ select cast type ทีหลัง
+  let query = supabase
+    .from('expense')
+    .select('id, amount, description, date, category_id, category(name)');
 
   if (from) query = query.gte('date', from);
   if (to) query = query.lte('date', to);
-  if (categoryId) query = query.eq('category_id', categoryId);
 
-  const { data, error } = await query;
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  return NextResponse.json(data);
-}
-
-// POST /api/expenses
-export async function POST(req: Request) {
-  const body = await req.json();
-  const { amount, description, category_id, date } = body;
-
-  const { data, error } = await supabase.from('expense').insert([
-    { amount, description, category_id, date }
-  ]);
+  // 👇 cast ผลลัพธ์เป็น Expense[]
+  const { data: expenses, error } = await query as { data: Expense[] | null, error: any };
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(data);
+  const total = expenses?.reduce((sum, e) => sum + e.amount, 0) || 0;
+
+  const byCategory = expenses?.reduce<Record<string, number>>((acc, e) => {
+    const name = e.category?.name || 'Unknown';
+    acc[name] = (acc[name] || 0) + e.amount;
+    return acc;
+  }, {}) || {};
+
+  return NextResponse.json({ total, byCategory });
 }
