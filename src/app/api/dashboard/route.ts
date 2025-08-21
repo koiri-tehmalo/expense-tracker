@@ -3,17 +3,21 @@ import { supabase } from '@/lib/supabaseClient';
 
 // กำหนด type สำหรับ expense
 interface Expense {
+  id: number;
   amount: number;
+  description: string;
+  date: string;
   category_id: number;
   category?: { name: string };
 }
+
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const from = searchParams.get('from');
   const to = searchParams.get('to');
 
-  let query = supabase.from<Expense>('expense').select('amount, category_id, category(name)');
+  let query = supabase.from<Expense, Expense>('expense').select('amount, category_id, category(name)');
 
   if (from) query = query.gte('date', from);
   if (to) query = query.lte('date', to);
@@ -24,7 +28,7 @@ export async function GET(req: Request) {
 
   const total = expenses?.reduce((sum, e) => sum + e.amount, 0) || 0;
 
-  const byCategory = expenses?.reduce<Record<string, number>>((acc, e) => {
+  const byCategory = expenses?.reduce<Record<string, number>>((acc, e: Expense) => {
     const name = e.category?.name || 'Unknown';
     acc[name] = (acc[name] || 0) + e.amount;
     return acc;
