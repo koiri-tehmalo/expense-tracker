@@ -20,6 +20,16 @@ export default function Dashboard() {
   const [to, setTo] = useState("");
   const [category_id, setCategoryId] = useState("");
 
+  const handleDeleteExpense = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this expense?")) return;
+
+    const { error } = await supabase.from("expense").delete().eq("id", id);
+    if (error) return alert("Delete failed: " + error.message);
+
+    // refresh data หลังลบ
+    fetchData();
+  };
+  
   const fetchCategories = async () => {
     const { data, error } = await supabase.from("category").select("*");
     if (data) setCategories(data);
@@ -83,6 +93,7 @@ export default function Dashboard() {
               <th className="border p-2 dark:border-gray-700">Category</th>
               <th className="border p-2 dark:border-gray-700">Description</th>
               <th className="border p-2 dark:border-gray-700">Amount (฿)</th>
+              <th className="border p-2 dark:border-gray-700">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -92,6 +103,14 @@ export default function Dashboard() {
                 <td className="border p-2 dark:border-gray-700">{e.category?.name || "Unknown"}</td>
                 <td className="border p-2 dark:border-gray-700">{e.description}</td>
                 <td className="border p-2 dark:border-gray-700">{e.amount}</td>
+                <td className="border p-2 dark:border-gray-700 flex gap-2">
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    onClick={() => handleDeleteExpense(e.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
